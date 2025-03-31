@@ -9,9 +9,12 @@ authors = [
     {name = "Marco Montevechi Filho", email = "montevechi1618@gmail.com"},
 ]
 description = "Simple device simulator to test EPICS IOCs."
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 keywords = ["EPICS", "hardware", "simulator"]
 dynamic = ["version"]
+dependencies = [
+  "pyyaml",
+]
 
 [project.urls]
 Homepage = "https://github.com/marcomontevechi1/device-simulator.git"
