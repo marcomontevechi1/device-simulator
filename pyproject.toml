@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "device_sim"
+readme = "README.md"
+authors = [
+    {name = "Marco Montevechi Filho", email = "montevechi1618@gmail.com"},
+]
+description = "Simple device simulator to test EPICS IOCs."
+requires-python = ">=3.8"
+keywords = ["EPICS", "hardware", "simulator"]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/marcomontevechi1/device-simulator.git"
