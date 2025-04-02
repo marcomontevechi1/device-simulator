@@ -2,12 +2,15 @@
 
 import socket
 import threading
+import re
 
 from .ParamList import ParamList
+from .Param import BadArgType
 
 DEVICES_LIST = []
+PROTOCOL_PARSE = re.compile(r'(W|R):([a-zA-Z0-9_]+):([a-zA-Z0-9_]*)')
 
-class Device:
+class Device(ParamList):
 
     """
     Simulates a device.
@@ -15,11 +18,11 @@ class Device:
 
     def __init__(self, name: str = None , param_source: dict = None, port: int = None, log_severity : int = 3):
         
+        super().__init__(param_source)
         self.port = port
         self.sock = None
         self.name = name
         self._log_severity = log_severity
-        self.paramList = ParamList(source = param_source)
         self.name_lock = threading.Lock()
 
         self.registerName()
@@ -77,12 +80,63 @@ class Device:
                     if not data:
                         # if data is not received break
                         break
-                    print("from connected user: " + str(data))
-                    data = input(' -> ')
-                    conn.send(data.encode())  # send data to the client
+                    self.log("From connected user: " + str(data), 2)
+                    answer = self.reply(data)
+                    conn.send(f"{answer}\n".encode())  # send data to the client
+                    self.log("To connected user: " + answer, 2)
                 except UnicodeDecodeError:
                     conn.close()  # close the connection
                     break
+
+    def reply(self, data: str):
+        """
+        Tries to execute action.
+        Replies with success or failure.
+        Returns reply message.
+        """
+
+        ret = ""
+        parameter = None
+
+        try:
+            action, param, val = self.parseProtocol(data)
+        except Exception as e:
+            return "E:BADPROTOCOLMATCH:"
+
+        if (action == "W" and val == "") or (action == "R" and val != ""):
+            return "E:BADCOMMAND:"
+        
+        try:
+            parameter = self.parameters[param]
+        except KeyError:
+            return "E:PARAMFOUND:"
+
+        if action == "R":
+            return "S:{}:{}".format(param, parameter.value)
+
+        try:
+            parameter.value = val
+        except BadArgType as b:
+            ret += "E:BADARGTYPE:"
+
+        return "S:{}:{}".format(param, parameter.value)
+    
+    def parseProtocol(self, data: str):
+        """
+        Matches protocol against pattern. Raises exception if not good.
+        Returns action, parameter and value otherwise.
+        """
+        parsed = PROTOCOL_PARSE.match(str(data))
+
+        try:
+            action, param, val = parsed.group(1), parsed.group(2), parsed.group(3)
+        except AttributeError as err:
+            msg = "Protocol parse error. Message received:"
+            msg += " {}. but protocol expects something that matches {}.".format(data, PROTOCOL_PARSE.pattern)
+            msg += " Error: {}".format(err)
+            raise Exception(msg)
+        
+        return str(action), str(param), str(val)
 
     def log(self, msg: str, severity: int = 3):
         """
@@ -95,7 +149,7 @@ class Device:
     def printParamList(self):
         # TODO: get this mess from some actuall pretty print function from Param class
         print("Parameter from {}".format(self.name))
-        for parameter in self.paramList.parameters.values():
+        for parameter in self.parameters.values():
             print("Name: {}".format(parameter.name))
             print("\tType: {}".format(parameter.type_))
             print("\tInitial value: {}".format(parameter.init_val))
