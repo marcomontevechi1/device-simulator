@@ -100,9 +100,7 @@ class Device:
             print("\tType: {}".format(parameter.type_))
             print("\tInitial value: {}".format(parameter.init_val))
             print("\tRandSum: {}".format(parameter.randsum))
-            print("\tRandSumStep: {}".format(parameter.randsumstep))
             print("\tRandMul: {}".format(parameter.randmul))
-            print("\tRandMulStep: {}".format(parameter.randmulstep))
 
     @property
     def log_severity(self):

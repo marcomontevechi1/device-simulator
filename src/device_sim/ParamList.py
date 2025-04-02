@@ -75,7 +75,5 @@ class ParamList:
             init_val = loadParamAttribute(parameter, "init")
             randsum = loadParamAttribute(parameter, "randsum")
             randmul = loadParamAttribute(parameter, "randmul")
-            randsumstep = loadParamAttribute(parameter, "randsumstep")
-            randmulstep = loadParamAttribute(parameter, "randmulstep")
-            self.parameters[name] = ( Param(name = name, typ = type_, init_val = init_val, randmul = randmul,
-                                          randmulstep = randmulstep, randsum = randsum, randsumstep = randsumstep) )
+            self.parameters[name] = ( Param(name = name, typ = type_, init_val = init_val, 
+                                            randmul = randmul, randsum = randsum) )

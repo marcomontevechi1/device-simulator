@@ -5,6 +5,9 @@ import random
 
 STRING_TO_BOOL = {"true": True, "1": True, "false": False, "0": False}
 
+DEFAULTS = {"randsum": 0.1,
+            "randmul": 0.1}
+
 class BadArgType(Exception):
 
     def __init__(self, msg):
@@ -18,21 +21,17 @@ class ParamType(StrEnum):
 
 class Param:
 
-    def __init__(self, name: str = None, typ: ParamType = ParamType.analog, init_val = None, randsum: float = 0, randmul: float = 1,
-                 randsumstep: float = 0.1, randmulstep: float = 0.1):
+    def __init__(self, name: str = None, typ: ParamType = ParamType.analog, init_val = None, 
+                 randsum: float = DEFAULTS["randsum"], randmul: float = DEFAULTS["randmul"]):
         """
         typ: Parameter type. Should be one of ParamType options.
         init_val: Initial value. Will assume default value if not provided.
         randsum: Random interval from which to get number to sum when value is gotten. 
                  Is simmetrical around 0. Defaults to 0. 
                  Only used if type is int or float.
-        randsumstep: step of valid values from -randsum to +randsum to choose.
-                 defaults to 0.1.
         randmul: Random interval from which to get number to multiply when value is gotten. 
                  Is simmetrical around 1. Defaults to 1.
                  Only used if type is int or float.
-        randmulstep: step of valid values from -randmul to +randmul to choose.
-                 defaults to 0.1.
         """
 
         if name == None:
@@ -44,16 +43,22 @@ class Param:
         self._value = init_val
         self.randsum = randsum
         self.randmul = randmul
-        self.randsumstep = randsumstep
-        self.randmulstep = randmulstep
 
+        self.initRand()
         self.parseTypeAndVal()
+
+    def initRand(self):
+        """
+        Initialize default values to random fluctuation parameters
+        """
+        if self.randmul == None: self.randmul = DEFAULTS["randmul"]
+        if self.randsum == None: self.randsum = DEFAULTS["randsum"]
 
     @property
     def value(self):
         if self.type_ in [ParamType.integer, ParamType.analog]:
-            self._value = self._value*random.randrange(1 - self.randmul, 1 + self.randmul, 
-                                                self.randmulstep) + random.randrange(self.randsum, self.randsum, self.randsumstep)
+            self._value = self._value*random.uniform(1 - self.randmul, 
+                                                     1 + self.randmul) + random.uniform(- self.randsum, self.randsum)
         return self._value
     
     @value.setter
