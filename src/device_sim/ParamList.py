@@ -1,22 +1,29 @@
 #!/usr/bin/env python3
 
 import yaml
+from schema import Schema, Optional, And, Or
 
-from .Param import Param
+from .Param import Param, ParamType
 
-DEFAULT_PARAMS = {"Params": [{"name": "A", "type": "b"}, 
-                             {"name": "B", "type": "a", "init": 10}, 
+ParamSchema = Schema({
+    "Params": And(
+        list,
+        [
+            {
+                "name": str,
+                Optional("type"): str,
+                Optional("init"): Or(str, int, float),
+                Optional("randsum"): Or(float, int),
+                Optional("randmul"): Or(float, int)
+            }
+        ]
+    )
+})
+
+DEFAULT_PARAMS = {"Params": [{"name": "A", "type": "b"},
+                             {"name": "B", "type": "a", "init": 10},
                              {"name": "C", "type": "a", "init": 10, "randsum": 0.5, "randmul": 0.2},
                              {"name": "D", "type": "s", "init": "mystring"}]}
-
-def loadParamAttribute(param: dict, attribute):
-    """
-    Return None if key not found in dictionary
-    """
-    try:
-        return param[attribute]
-    except:
-        return None
 
 class ParamList:
 
@@ -62,18 +69,13 @@ class ParamList:
             err_msg += "Params dictionary is inadequate. Should have only one key called 'Params'. Has {} instead.\n".format(list(source.keys()))
             raise Exception(err_msg)
 
-        if not isinstance(source["Params"], list):
-            err_msg += "Params key should point to a list. It points instead to {}.\n".format(type(source["Params"]))
-            raise Exception(err_msg)
+        ParamSchema.validate(source)
 
         for parameter in source["Params"]:
-            try:
-                name = parameter["name"]
-            except KeyError:
-                raise Exception("Parameter without a name found! All parameters need a name.\n")
-            type_ = loadParamAttribute(parameter, "type")
-            init_val = loadParamAttribute(parameter, "init")
-            randsum = loadParamAttribute(parameter, "randsum")
-            randmul = loadParamAttribute(parameter, "randmul")
+            name = parameter.get("name")
+            type_ = parameter.get("type")
+            init_val = parameter.get("init")
+            randsum = parameter.get("randsum")
+            randmul = parameter.get("randmul")
             self.parameters[name] = ( Param(name = name, typ = type_, init_val = init_val, 
                                             randmul = randmul, randsum = randsum) )
