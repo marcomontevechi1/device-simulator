@@ -38,7 +38,7 @@ class Param:
             raise Exception("Parameter needs a name! name = None is not acceptable.\n")
 
         self.name = name
-        self.type_ = typ
+        self.type_ = ParamType(typ)
         self.init_val = init_val
         self._value = init_val
         self.randsum = randsum
