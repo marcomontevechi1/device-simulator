@@ -6,24 +6,24 @@ from schema import Schema, Optional, And, Or
 from .Param import Param, ParamType
 
 ParamSchema = Schema({
-    "Params": And(
-        list,
-        [
-            {
-                "name": str,
+        "Params": {
+            str: {
                 Optional("type"): str,
                 Optional("init"): Or(str, int, float),
                 Optional("randsum"): Or(float, int),
                 Optional("randmul"): Or(float, int)
             }
-        ]
-    )
-})
+        }
+    })
 
-DEFAULT_PARAMS = {"Params": [{"name": "A", "type": "b"},
-                             {"name": "B", "type": "a", "init": 10},
-                             {"name": "C", "type": "a", "init": 10, "randsum": 0.5, "randmul": 0.2},
-                             {"name": "D", "type": "s", "init": "mystring"}]}
+
+DEFAULT_PARAMS = {"Params":  {
+                             "A": {"type": "b"},
+                             "B": {"type": "a", "init": 10},
+                             "C": {"type": "a", "init": 10, "randsum": 0.5, "randmul": 0.2},
+                             "D": {"type": "s", "init": "mystring"}
+                             }
+                 }
 
 class ParamList:
 
@@ -71,11 +71,11 @@ class ParamList:
 
         ParamSchema.validate(source)
 
-        for parameter in source["Params"]:
-            name = parameter.get("name")
-            type_ = parameter.get("type")
-            init_val = parameter.get("init")
-            randsum = parameter.get("randsum")
-            randmul = parameter.get("randmul")
+        for parameter, vals in source["Params"].items():
+            name = parameter
+            type_ = vals.get("type")
+            init_val = vals.get("init")
+            randsum = vals.get("randsum")
+            randmul = vals.get("randmul")
             self.parameters[name] = ( Param(name = name, typ = type_, init_val = init_val, 
                                             randmul = randmul, randsum = randsum) )
