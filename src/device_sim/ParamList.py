@@ -79,3 +79,11 @@ class ParamList:
             randmul = vals.get("randmul")
             self.parameters[name] = ( Param(name = name, typ = type_, init_val = init_val, 
                                             randmul = randmul, randsum = randsum) )
+
+    def __str__(self):
+        string = ""
+        for param in self.parameters.values():
+            string += param.__str__()
+            string += "\n\r"
+
+        return string
