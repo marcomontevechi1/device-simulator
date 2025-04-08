@@ -92,3 +92,8 @@ class Param:
         if not isinstance(self._value, types_per_val[self.type_]):
             msg = "Initial value {} not allowed for type {}!".format(self._value, self.type_)
             raise Exception(msg)
+
+    def __str__(self):
+        string = f"Name: {self.name}\n\ttype: {self.type_}\n\tcurrent value: {self._value}\n\t"
+        string += f"initial value: {self.init_val}\n\trandsum: {self.randsum}\n\trandmul: {self.randmul}"
+        return string
