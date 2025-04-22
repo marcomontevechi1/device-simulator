@@ -2,7 +2,6 @@
 
 import yaml
 from schema import Schema, Optional, Or
-
 from .Device import Device
 
 DeviceFile = Schema({
@@ -84,7 +83,3 @@ class DevicePool:
 
                 dev = Device(name = device, param_source=params_source|params, port=port, log=log)
                 self.devices[dev.name] = dev
-
-if __name__ == "__main__":
-
-    pass
