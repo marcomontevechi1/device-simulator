@@ -19,3 +19,6 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/marcomontevechi1/device-simulator.git"
+
+[project.scripts]
+device-pool = "device_sim.Main:main"

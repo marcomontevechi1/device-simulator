@@ -147,14 +147,9 @@ class Device(ParamList):
             print("{}: {}".format(self.name, msg))
 
     def printParamList(self):
-        # TODO: get this mess from some actuall pretty print function from Param class
-        print("Parameter from {}".format(self.name))
+        print("Parameters from {}: ".format(self.name))
         for parameter in self.parameters.values():
-            print("Name: {}".format(parameter.name))
-            print("\tType: {}".format(parameter.type_))
-            print("\tInitial value: {}".format(parameter.init_val))
-            print("\tRandSum: {}".format(parameter.randsum))
-            print("\tRandMul: {}".format(parameter.randmul))
+            print(parameter)
 
     @property
     def log_severity(self):
