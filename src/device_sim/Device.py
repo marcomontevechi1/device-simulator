@@ -112,7 +112,7 @@ class Device(ParamList):
             return "E:PARAMNOTFOUND:"
 
         if action == "R":
-            return "S:{}:{}".format(param, parameter.value)
+            return "R:{}:{}".format(param, parameter.value)
 
         try:
             parameter.value = val
