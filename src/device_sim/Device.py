@@ -109,7 +109,7 @@ class Device(ParamList):
         try:
             parameter = self.parameters[param]
         except KeyError:
-            return "E:PARAMFOUND:"
+            return "E:PARAMNOTFOUND:"
 
         if action == "R":
             return "S:{}:{}".format(param, parameter.value)
