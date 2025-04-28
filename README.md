@@ -10,7 +10,7 @@ If the protocol is well coded, it should work like:
 ```
 # Requisition for reading
 Client: R:paramName:
-Device: S:paraName:Value
+Device: R:paraName:Value
 
 # Error codes and such
 Client: Something_That_does_not_go_well
@@ -19,6 +19,12 @@ Device: E:Error_Message:
 # Requisition for writing
 Client: W:paraName:newValue
 Device: S:paraName:newValue
+
+# Requisition for seeing all parameters:
+Client: P:S:
+Device: prints a list of the parameters in the server log.
+Client: P:C:
+Device: Sends a list of the parameters for the client socket.
 ```
 
 # Installation and Usage

@@ -8,7 +8,7 @@ from .ParamList import ParamList
 from .Param import BadArgType
 
 DEVICES_LIST = []
-PROTOCOL_PARSE = re.compile(r'(W|R):([a-zA-Z0-9_]+):([a-zA-Z0-9_]*)')
+PROTOCOL_PARSE = re.compile(r'(W|R|P):([a-zA-Z0-9_]+):([a-zA-Z0-9_]*)')
 
 class Device(ParamList):
 
@@ -103,16 +103,30 @@ class Device(ParamList):
         except Exception as e:
             return "E:BADPROTOCOLMATCH:"
 
-        if (action == "W" and val == "") or (action == "R" and val != ""):
+        if (
+            (action == "W" and val == "") or
+            ( (action == "R" or action == "P" ) and val != "") or
+            ( action == "P" and param not in ["S", "C"])
+            ):
             return "E:BADCOMMAND:"
         
+        if action == "P":
+            if param == "S":
+                self.printParamList()
+                return "P:S:OK"
+            else:
+                msg = "Parameters from {}:\n".format(self.name)
+                for parameter in self.parameters.values():
+                    msg += "{}\n".format(parameter)
+                return msg
+
         try:
             parameter = self.parameters[param]
         except KeyError:
-            return "E:PARAMFOUND:"
+            return "E:PARAMNOTFOUND:"
 
         if action == "R":
-            return "S:{}:{}".format(param, parameter.value)
+            return "R:{}:{}".format(param, parameter.value)
 
         try:
             parameter.value = val
