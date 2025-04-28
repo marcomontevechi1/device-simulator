@@ -19,6 +19,12 @@ Device: E:Error_Message:
 # Requisition for writing
 Client: W:paraName:newValue
 Device: S:paraName:newValue
+
+# Requisition for seeing all parameters:
+Client: P:S:
+Device: prints a list of the parameters in the server log.
+Client: P:C:
+Device: Sends a list of the parameters for the client socket.
 ```
 
 # Installation and Usage
