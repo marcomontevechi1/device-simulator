@@ -18,6 +18,11 @@ def parse_args():
                         required = False,
                         default = 0,
                         type = int)
+    parser.add_argument('-l', '--log-severity',
+                        help = "Default severity for logs of devices created without source file.",
+                        required = False,
+                        default = 3,
+                        type = int)
     
     return parser.parse_args()
 
@@ -29,7 +34,7 @@ def main():
         print("Number of devices is 0 and no source file is provided. Doing nothing...")
         exit(0)
 
-    devices = DevicePool(args.source, args.number)
+    devices = DevicePool(args.source, args.number, log_severity=args.log_severity)
 
 if __name__ == "__main__":
 

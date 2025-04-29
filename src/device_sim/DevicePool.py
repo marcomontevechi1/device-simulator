@@ -20,7 +20,7 @@ class DevicePool:
     Class to manage creation of several devices.
     """
 
-    def __init__(self, source: str | dict = None, number: int = 0, ):
+    def __init__(self, source: str | dict = None, number: int = 0, log_severity : int = 3):
         """
         source: dictionary or yaml file containing device definition. A dictionary with
                      format defined by DeviceFile.
@@ -31,6 +31,7 @@ class DevicePool:
         
         self.number = number
         self.source = source
+        self.log_severity = log_severity
         self.devices = {}
 
         self.loadSource()
@@ -65,7 +66,7 @@ class DevicePool:
         """
 
         for n in range(0, self.number):
-            device = Device()
+            device = Device(log_severity = self.log_severity)
             self.devices[device.name] = device
 
 
