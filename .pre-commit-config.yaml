@@ -1,0 +1,8 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.3.0  # ou outra versão estável desejada
+    hooks:
+      - id: black
+        name: run black on the project source
+        files: ^src/device_sim/
+
