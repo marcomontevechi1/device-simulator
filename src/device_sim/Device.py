@@ -93,7 +93,7 @@ class Device(ParamList):
                     answer = self.reply(data)
                     conn.send(f"{answer}\n".encode())  # send data to the client
                     self.log("To connected user: " + answer, 2)
-                except UnicodeDecodeError:
+                except (UnicodeDecodeError, ConnectionResetError):
                     conn.close()  # close the connection
                     break
 
