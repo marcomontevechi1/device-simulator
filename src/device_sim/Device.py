@@ -65,19 +65,20 @@ class Device(ParamList):
         Chooses a random port if not.
         """
 
+        host = "0.0.0.0"
+        port = 0
+        if self.port:
+            port = self.port
+
+        self.sock = socket.socket()
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sock.bind((host, port))
+        (self.host, self.port) = self.sock.getsockname()
+        self.writeInfo()
+        self.sock.listen()
+
         while True:
 
-            host = "0.0.0.0"
-            port = 0
-            if self.port:
-                port = self.port
-
-            self.sock = socket.socket()
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.bind((host, port))
-            (self.host, self.port) = self.sock.getsockname()
-            self.writeInfo()
-            self.sock.listen()
             conn, address = self.sock.accept()
             self.log("Connection from: " + str(address))
 
