@@ -10,6 +10,7 @@ DeviceFile = Schema({
                 Optional("source"): str,
                 Optional("port"): int,
                 Optional("log"): int,
+                Optional("portfile") : str,
                 Optional("Params"): dict
             }
         }
@@ -20,18 +21,21 @@ class DevicePool:
     Class to manage creation of several devices.
     """
 
-    def __init__(self, source: str | dict = None, number: int = 0, log_severity : int = 3):
+    def __init__(self, source: str | dict = None, number: int = 0, log_severity : int = 3, portfile_prefix : str = None):
         """
         source: dictionary or yaml file containing device definition. A dictionary with
                      format defined by DeviceFile.
         number: number of devices to be created. If provided together with
                 source_file, creates all the devices in the source file plus 
                 number more default devices.
+        log_severity: default log severity for devices not from yaml file.
+        portfile_prefix: directory in which to save files with <host>:<port> for devices not from yaml file.
         """
         
         self.number = number
         self.source = source
         self.log_severity = log_severity
+        self.portfile_prefix = portfile_prefix
         self.devices = {}
 
         self.loadSource()
@@ -66,7 +70,7 @@ class DevicePool:
         """
 
         for n in range(0, self.number):
-            device = Device(log_severity = self.log_severity)
+            device = Device(log_severity = self.log_severity, portfile_prefix = self.portfile_prefix)
             self.devices[device.name] = device
 
 
@@ -76,11 +80,12 @@ class DevicePool:
                 params_source = vals.get("source")
                 port = vals.get("port")
                 log = vals.get("log")
+                portfile = vals.get("portfile")
                 params = {"Params": vals.get("Params")}
 
                 if (params_source is not None) and (params is not None):
                     with open(params_source) as stream:
                         params_source = yaml.safe_load(params_source)
 
-                dev = Device(name = device, param_source=params_source|params, port=port, log=log)
+                dev = Device(name = device, param_source=params_source|params, port=port, log_severity=log, portfile_prefix = portfile)
                 self.devices[dev.name] = dev

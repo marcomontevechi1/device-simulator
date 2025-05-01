@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import os
 import socket
 import threading
 import re
+import atexit
 
 from .ParamList import ParamList
 from .Param import BadArgType
@@ -16,13 +18,15 @@ class Device(ParamList):
     Simulates a device.
     """
 
-    def __init__(self, name: str = None , param_source: dict = None, port: int = None, log_severity : int = 3):
+    def __init__(self, name: str = None , param_source: dict = None, port: int = None, 
+                 log_severity : int = 3, portfile_prefix : str = None):
         
         super().__init__(param_source)
         self.port = port
         self.sock = None
         self.name = name
         self._log_severity = log_severity
+        self.portfile_prefix = portfile_prefix
         self.name_lock = threading.Lock()
 
         self.registerName()
@@ -65,9 +69,8 @@ class Device(ParamList):
             self.sock = socket.socket()
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock.bind((host, port))
-            (host, port) = self.sock.getsockname()
-            self.port = port
-            self.log("Bound socket to {}:{}".format(host, port))
+            (self.host, self.port) = self.sock.getsockname()
+            self.writeInfo()
             self.sock.listen()
             conn, address = self.sock.accept()
             self.log("Connection from: " + str(address))
@@ -87,6 +90,39 @@ class Device(ParamList):
                 except UnicodeDecodeError:
                     conn.close()  # close the connection
                     break
+
+    def writeInfo(self):
+        """
+        Logs info about which server and port it's bound.
+        If there is a file prefix to write, create file with device
+        name and write <self.host:stlf.port> to it.
+        """
+
+        self.log("Bound socket to {}:{}".format(self.host, self.port))
+
+        if self.portfile_prefix is None:
+            return
+        
+        if not os.path.isdir(self.portfile_prefix):
+            msg = "Provided path {} for portfile".format(self.portfile_prefix)
+            msg += " is not a directory."
+            raise Exception(msg)
+            
+        filepath = os.path.join(self.portfile_prefix, 
+                                          "{}.port".format(self.name))
+        
+        counter = 0
+        while os.path.isfile(filepath):
+            
+            counter += 1
+            filepath = os.path.join(self.portfile_prefix, 
+                                        "{}-{}.port".format(self.name, counter))
+            
+        self.log(f"Writing address to file {filepath}")
+
+        with open(filepath, "w") as file:
+            file.write("{}:{}".format(self.host, self.port))
+            atexit.register(lambda: os.remove(filepath) if os.path.exists(filepath) else None)
 
     def reply(self, data: str):
         """

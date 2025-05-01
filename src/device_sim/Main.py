@@ -23,6 +23,11 @@ def parse_args():
                         required = False,
                         default = 3,
                         type = int)
+    parser.add_argument('-p', '--portfile',
+                        help = "Directory where to store file with devices addresses",
+                        required = False,
+                        default = None,
+                        type = str)
     
     return parser.parse_args()
 
@@ -34,7 +39,7 @@ def main():
         print("Number of devices is 0 and no source file is provided. Doing nothing...")
         exit(0)
 
-    devices = DevicePool(args.source, args.number, log_severity=args.log_severity)
+    devices = DevicePool(args.source, args.number, log_severity=args.log_severity, portfile_prefix=args.portfile)
 
 if __name__ == "__main__":
 
