@@ -4,34 +4,43 @@ import yaml
 from schema import Schema, Optional, Or
 from .Device import Device
 
-DeviceFile = Schema({
+DeviceFile = Schema(
+    {
         "Devices": {
             str: {
                 Optional("source"): str,
                 Optional("port"): int,
                 Optional("log"): int,
-                Optional("portfile") : str,
-                Optional("Params"): dict
+                Optional("portfile"): str,
+                Optional("Params"): dict,
             }
         }
-    })
+    }
+)
+
 
 class DevicePool:
     """
     Class to manage creation of several devices.
     """
 
-    def __init__(self, source: str | dict = None, number: int = 0, log_severity : int = 3, portfile_prefix : str = None):
+    def __init__(
+        self,
+        source: str | dict = None,
+        number: int = 0,
+        log_severity: int = 3,
+        portfile_prefix: str = None,
+    ):
         """
         source: dictionary or yaml file containing device definition. A dictionary with
                      format defined by DeviceFile.
         number: number of devices to be created. If provided together with
-                source_file, creates all the devices in the source file plus 
+                source_file, creates all the devices in the source file plus
                 number more default devices.
         log_severity: default log severity for devices not from yaml file.
         portfile_prefix: directory in which to save files with <host>:<port> for devices not from yaml file.
         """
-        
+
         self.number = number
         self.source = source
         self.log_severity = log_severity
@@ -55,9 +64,13 @@ class DevicePool:
             self.source = local_src
 
             return
-        
+
         if not isinstance(self.source, dict):
-            raise Exception("Source is neither a valid string nor a dictionary. Source object: {}".format(self.source))
+            raise Exception(
+                "Source is neither a valid string nor a dictionary. Source object: {}".format(
+                    self.source
+                )
+            )
 
     def createDevices(self):
         """
@@ -70,9 +83,10 @@ class DevicePool:
         """
 
         for n in range(0, self.number):
-            device = Device(log_severity = self.log_severity, portfile_prefix = self.portfile_prefix)
+            device = Device(
+                log_severity=self.log_severity, portfile_prefix=self.portfile_prefix
+            )
             self.devices[device.name] = device
-
 
         if len(self.source) != 0:
             DeviceFile.validate(self.source)
@@ -87,5 +101,11 @@ class DevicePool:
                     with open(params_source) as stream:
                         params_source = yaml.safe_load(params_source)
 
-                dev = Device(name = device, param_source=params_source|params, port=port, log_severity=log, portfile_prefix = portfile)
+                dev = Device(
+                    name=device,
+                    param_source=params_source | params,
+                    port=port,
+                    log_severity=log,
+                    portfile_prefix=portfile,
+                )
                 self.devices[dev.name] = dev

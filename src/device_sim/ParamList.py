@@ -5,29 +5,33 @@ from schema import Schema, Optional, And, Or
 
 from .Param import Param, ParamType
 
-ParamSchema = Schema({
+ParamSchema = Schema(
+    {
         "Params": {
             str: {
                 Optional("type"): str,
                 Optional("init"): Or(str, int, float),
                 Optional("randsum"): Or(float, int),
-                Optional("randmul"): Or(float, int)
+                Optional("randmul"): Or(float, int),
             }
         }
-    })
+    }
+)
 
 
-DEFAULT_PARAMS = {"Params":  {
-                             "A": {"type": "b"},
-                             "B": {"type": "a", "init": 10},
-                             "C": {"type": "a", "init": 10, "randsum": 0.5, "randmul": 0.2},
-                             "D": {"type": "s", "init": "mystring"}
-                             }
-                 }
+DEFAULT_PARAMS = {
+    "Params": {
+        "A": {"type": "b"},
+        "B": {"type": "a", "init": 10},
+        "C": {"type": "a", "init": 10, "randsum": 0.5, "randmul": 0.2},
+        "D": {"type": "s", "init": "mystring"},
+    }
+}
+
 
 class ParamList:
 
-    def __init__(self, source = None):
+    def __init__(self, source=None):
         """
         sources: a string containing the file path to a yaml file with the defined parameters or a dictionary
         containing the parameters definition.
@@ -56,17 +60,21 @@ class ParamList:
         elif isinstance(self.source, dict):
             local_src = self.source
         else:
-            raise Exception("Parameters source must be string pointing to yaml source file or python dictionary.")
-        
+            raise Exception(
+                "Parameters source must be string pointing to yaml source file or python dictionary."
+            )
+
         self.loadParams(local_src)
-        
+
     def loadParams(self, source: dict):
         """
         Checks if dictionary is in correct format and if all keys and values make sense.
         """
 
         if len(list(source.keys())) != 1 or "Params" not in list(source.keys()):
-            err_msg += "Params dictionary is inadequate. Should have only one key called 'Params'. Has {} instead.\n".format(list(source.keys()))
+            err_msg += "Params dictionary is inadequate. Should have only one key called 'Params'. Has {} instead.\n".format(
+                list(source.keys())
+            )
             raise Exception(err_msg)
 
         ParamSchema.validate(source)
@@ -77,8 +85,13 @@ class ParamList:
             init_val = vals.get("init")
             randsum = vals.get("randsum")
             randmul = vals.get("randmul")
-            self.parameters[name] = ( Param(name = name, typ = type_, init_val = init_val, 
-                                            randmul = randmul, randsum = randsum) )
+            self.parameters[name] = Param(
+                name=name,
+                typ=type_,
+                init_val=init_val,
+                randmul=randmul,
+                randsum=randsum,
+            )
 
     def __str__(self):
         string = ""

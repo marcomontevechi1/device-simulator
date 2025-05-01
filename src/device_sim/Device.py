@@ -10,17 +10,23 @@ from .ParamList import ParamList
 from .Param import BadArgType
 
 DEVICES_LIST = []
-PROTOCOL_PARSE = re.compile(r'(W|R|P):([a-zA-Z0-9_]+):([a-zA-Z0-9_]*)')
+PROTOCOL_PARSE = re.compile(r"(W|R|P):([a-zA-Z0-9_]+):([a-zA-Z0-9_]*)")
+
 
 class Device(ParamList):
-
     """
     Simulates a device.
     """
 
-    def __init__(self, name: str = None , param_source: dict = None, port: int = None, 
-                 log_severity : int = 3, portfile_prefix : str = None):
-        
+    def __init__(
+        self,
+        name: str = None,
+        param_source: dict = None,
+        port: int = None,
+        log_severity: int = 3,
+        portfile_prefix: str = None,
+    ):
+
         super().__init__(param_source)
         self.port = port
         self.sock = None
@@ -30,23 +36,23 @@ class Device(ParamList):
         self.name_lock = threading.Lock()
 
         self.registerName()
-        sockThread = threading.Thread(target = self.createSocket)
+        sockThread = threading.Thread(target=self.createSocket)
         sockThread.start()
 
     def registerName(self):
         """
         Puts name in device list.
-        If name is already there, add an integer to its end. 
-        If name is not defined, define it as DeviceSim<N> 
+        If name is already there, add an integer to its end.
+        If name is not defined, define it as DeviceSim<N>
         where N is a number from 0 onwards.
         """
         if self.name is None:
             self.name = "DeviceSim"
-        
+
         n = 0
         self.name_lock.acquire()
         while "{}{}".format(self.name, n) in DEVICES_LIST:
-            n+=1
+            n += 1
 
         self.name = "{}{}".format(self.name, n)
         DEVICES_LIST.append(self.name)
@@ -65,7 +71,7 @@ class Device(ParamList):
             port = 0
             if self.port:
                 port = self.port
-            
+
             self.sock = socket.socket()
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock.bind((host, port))
@@ -102,27 +108,29 @@ class Device(ParamList):
 
         if self.portfile_prefix is None:
             return
-        
+
         if not os.path.isdir(self.portfile_prefix):
             msg = "Provided path {} for portfile".format(self.portfile_prefix)
             msg += " is not a directory."
             raise Exception(msg)
-            
-        filepath = os.path.join(self.portfile_prefix, 
-                                          "{}.port".format(self.name))
-        
+
+        filepath = os.path.join(self.portfile_prefix, "{}.port".format(self.name))
+
         counter = 0
         while os.path.isfile(filepath):
-            
+
             counter += 1
-            filepath = os.path.join(self.portfile_prefix, 
-                                        "{}-{}.port".format(self.name, counter))
-            
+            filepath = os.path.join(
+                self.portfile_prefix, "{}-{}.port".format(self.name, counter)
+            )
+
         self.log(f"Writing address to file {filepath}")
 
         with open(filepath, "w") as file:
             file.write("{}:{}".format(self.host, self.port))
-            atexit.register(lambda: os.remove(filepath) if os.path.exists(filepath) else None)
+            atexit.register(
+                lambda: os.remove(filepath) if os.path.exists(filepath) else None
+            )
 
     def reply(self, data: str):
         """
@@ -140,12 +148,12 @@ class Device(ParamList):
             return "E:BADPROTOCOLMATCH:"
 
         if (
-            (action == "W" and val == "") or
-            ( (action == "R" or action == "P" ) and val != "") or
-            ( action == "P" and param not in ["S", "C"])
-            ):
+            (action == "W" and val == "")
+            or ((action == "R" or action == "P") and val != "")
+            or (action == "P" and param not in ["S", "C"])
+        ):
             return "E:BADCOMMAND:"
-        
+
         if action == "P":
             if param == "S":
                 self.printParamList()
@@ -170,7 +178,7 @@ class Device(ParamList):
             ret += "E:BADARGTYPE:"
 
         return "S:{}:{}".format(param, parameter.value)
-    
+
     def parseProtocol(self, data: str):
         """
         Matches protocol against pattern. Raises exception if not good.
@@ -182,10 +190,12 @@ class Device(ParamList):
             action, param, val = parsed.group(1), parsed.group(2), parsed.group(3)
         except AttributeError as err:
             msg = "Protocol parse error. Message received:"
-            msg += " {}. but protocol expects something that matches {}.".format(data, PROTOCOL_PARSE.pattern)
+            msg += " {}. but protocol expects something that matches {}.".format(
+                data, PROTOCOL_PARSE.pattern
+            )
             msg += " Error: {}".format(err)
             raise Exception(msg)
-        
+
         return str(action), str(param), str(val)
 
     def log(self, msg: str, severity: int = 3):
@@ -204,7 +214,7 @@ class Device(ParamList):
     @property
     def log_severity(self):
         return self._log_severity
-    
+
     @log_severity.setter
     def log_severity(self, val):
         self._log_severity = val
