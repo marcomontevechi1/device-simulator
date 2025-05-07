@@ -34,9 +34,17 @@ def parse_args():
         type=int,
     )
     parser.add_argument(
+        "-d",
+        "--portdir",
+        help="Directory where to store file with devices addresses.",
+        required=False,
+        default=None,
+        type=str,
+    )
+    parser.add_argument(
         "-p",
         "--portfile",
-        help="Directory where to store file with devices addresses",
+        help="File name where to store device addresses. Defaults to device name for each device.",
         required=False,
         default=None,
         type=str,
@@ -57,7 +65,8 @@ def main():
         args.source,
         args.number,
         log_severity=args.log_severity,
-        portfile_prefix=args.portfile,
+        portfile_prefix=args.portdir,
+        portfile_name=args.portfile,
     )
 
 

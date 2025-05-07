@@ -11,7 +11,8 @@ DeviceFile = Schema(
                 Optional("source"): str,
                 Optional("port"): int,
                 Optional("log"): int,
-                Optional("portfile"): str,
+                Optional("portfile_prefix"): str,
+                Optional("portfile_name"): str,
                 Optional("Params"): dict,
             }
         }
@@ -30,6 +31,7 @@ class DevicePool:
         number: int = 0,
         log_severity: int = 3,
         portfile_prefix: str = None,
+        portfile_name: str = None,
     ):
         """
         source: dictionary or yaml file containing device definition. A dictionary with
@@ -39,12 +41,15 @@ class DevicePool:
                 number more default devices.
         log_severity: default log severity for devices not from yaml file.
         portfile_prefix: directory in which to save files with <host>:<port> for devices not from yaml file.
+        portfile_name:   filepath were to save files with <host>:<port>. If used for more than one device,
+                         will be appended with '-<number>'
         """
 
         self.number = number
         self.source = source
         self.log_severity = log_severity
         self.portfile_prefix = portfile_prefix
+        self.portfile_name = portfile_name
         self.devices = {}
 
         self.loadSource()
@@ -84,7 +89,9 @@ class DevicePool:
 
         for n in range(0, self.number):
             device = Device(
-                log_severity=self.log_severity, portfile_prefix=self.portfile_prefix
+                log_severity=self.log_severity,
+                portfile_prefix=self.portfile_prefix,
+                portfile_name=self.portfile_name,
             )
             self.devices[device.name] = device
 
@@ -94,7 +101,8 @@ class DevicePool:
                 params_source = vals.get("source")
                 port = vals.get("port")
                 log = vals.get("log")
-                portfile = vals.get("portfile")
+                portfile_prefix = vals.get("portfile_prefix")
+                portfile_name = vals.get("portfile_name")
                 params = {"Params": vals.get("Params")}
 
                 if (params_source is not None) and (params is not None):
@@ -106,6 +114,7 @@ class DevicePool:
                     param_source=params_source | params,
                     port=port,
                     log_severity=log,
-                    portfile_prefix=portfile,
+                    portfile_prefix=portfile_prefix,
+                    portfile_name=portfile_name,
                 )
                 self.devices[dev.name] = dev

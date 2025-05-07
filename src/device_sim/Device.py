@@ -25,6 +25,7 @@ class Device(ParamList):
         port: int = None,
         log_severity: int = 3,
         portfile_prefix: str = None,
+        portfile_name: str = None,
     ):
 
         super().__init__(param_source)
@@ -33,6 +34,7 @@ class Device(ParamList):
         self.name = name
         self._log_severity = log_severity
         self.portfile_prefix = portfile_prefix
+        self.portfile_name = portfile_name
         self.name_lock = threading.Lock()
 
         self.registerName()
@@ -107,28 +109,36 @@ class Device(ParamList):
 
         self.log("Bound socket to {}:{}".format(self.host, self.port))
 
-        if self.portfile_prefix is None:
+        if self.portfile_prefix is None and self.portfile_name is None:
             return
 
-        if not os.path.isdir(self.portfile_prefix):
+        if (self.portfile_prefix is not None) and (
+            not os.path.isdir(self.portfile_prefix)
+        ):
             msg = "Provided path {} for portfile".format(self.portfile_prefix)
             msg += " is not a directory."
             raise Exception(msg)
 
         filepath = os.path.join(self.portfile_prefix, "{}.port".format(self.name))
+        if self.portfile_name is not None:
+            filepath = os.path.join(self.portfile_prefix, self.portfile_name)
 
         counter = 0
+        name = self.portfile_name
+        if self.portfile_name is None:
+            name = self.name
         while os.path.isfile(filepath):
 
             counter += 1
             filepath = os.path.join(
-                self.portfile_prefix, "{}-{}.port".format(self.name, counter)
+                self.portfile_prefix, "{}-{}.port".format(name, counter)
             )
 
         self.log(f"Writing address to file {filepath}")
 
         with open(filepath, "w") as file:
-            file.write("{}:{}".format(self.host, self.port))
+            file.write(f"DEVICE_ADDRESS={self.host}\n")
+            file.write(f"DEVICE_PORT={self.port}")
             atexit.register(
                 lambda: os.remove(filepath) if os.path.exists(filepath) else None
             )
